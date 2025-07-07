@@ -2,9 +2,22 @@ import { Router } from 'express';
 import { productDBManager } from '../dao/productDBManager.js';
 import { cartDBManager } from '../dao/cartDBManager.js';
 
+
 const router = Router();
 const ProductService = new productDBManager();
 const CartService = new cartDBManager(ProductService);
+
+
+
+router.get("/", async(req, res)=>{
+ let usuarios=[
+        {id:1, nombre:"Luciana", email:"luciana@test.com", password:"123", rol:"user"},
+        {id:2, nombre:"Juan", email:"juan@test.com", password:"123", rol:"user"},
+        {id:3, nombre:"Romina", email:"romina@test.com", password:"123", rol:"admin"},
+    ]
+  res.setHeader('Content-Type','application/json');
+  return res.status(200).json({payload:usuarios});  
+});
 
 router.get('/products', async (req, res) => {
     const products = await ProductService.getAllProducts(req.query);
@@ -61,5 +74,7 @@ router.get('/cart/:cid', async (req, res) => {
         }
     )
 });
+
+
 
 export default router;
