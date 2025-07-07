@@ -8,10 +8,13 @@ import { connDB } from './config/db.js';
 import productRouter from './routes/productRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
+import usersRouter from './routes/users.router.js';
 import __dirname from './utils/constantsUtil.js';
 import websocket from './websocket.js';
 import { config } from './config/config.js';
-import {router as usersRouter} from './routes/users.router.js'
+
+import passport from 'passport';
+import { iniciarPassport } from './config/passport.config.js';
 
 const app = express();
 
@@ -25,6 +28,9 @@ app.set('view engine', 'handlebars');
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
+
+iniciarPassport(); 
+app.use(passport.initialize()); 
 
 //Routers
 app.use('/api/products', productRouter);

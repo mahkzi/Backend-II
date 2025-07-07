@@ -1,5 +1,6 @@
 export const config = {
     PORT: 8080,
     MONGO_URL:"mongodb+srv://maximocastrobraga:dLnImCmVxpglFbWs@baseecommercemoduloii.l48cdcj.mongodb.net/",
-    DB_Name: "entrega-final"
+    DB_Name: "entrega-final",
+    JWT_SECRET:"CoderCoder123"
 };
