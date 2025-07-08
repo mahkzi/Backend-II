@@ -1,5 +1,6 @@
 import { usersModel} from "./models/userModel.js";
 import { cartDBManager } from "./cartDBManager.js";
+import bcrypt from "bcrypt";
 
 const cartManager = new cartDBManager();
 
@@ -31,15 +32,11 @@ export class UsersManager{
        try {
             const newCart = await cartManager.createCart();
             userData.cart = newCart._id;
-
-            console.log("DEBUG: userData justo antes de usersModel.create (o new Model):", userData);
-            console.log("--- ¡VERIFICACIÓN: ESTE ES EL NUEVO CÓDIGO EJECUTÁNDOSE! ---");
-        
-            const user = new usersModel(userData); 
-            const userSaved = await user.save(); 
-
-            return userSaved; 
-
+             console.log("DEBUG: userData justo antes del hash:", userData);
+              userData.password = await bcrypt.hash(userData.password, 10);
+               console.log("DEBUG: userData DESPUÉS del hash:", userData);
+                return await usersModel.create(userData);
+                
         } catch (error) {
             console.error("Error al crear usuario en DB:", error);
             throw error;

@@ -42,28 +42,33 @@ export const iniciarPassport = () =>{
             },
             async (email, password, done) => {
                 try {
-                  
+
                     const user = await UsersManager.getUserByEmail(email);
+
                     if (!user) {
-                        return done(null, false, { message: "Credenciales inválidas" });
+                        return done(null, false, { message: `Credenciales incorrectas: ${email}` });
                     }
 
-                   
-                    const isPasswordValid = bcrypt.compareSync(password, user.password);
-                    if (!isPasswordValid) {
-                        return done(null, false, { message: "Credenciales inválidas" });
+                 
+                    const isValidPassword = await bcrypt.compare(password, user.password);
+                    if (!isValidPassword) {
+                        return done(null, false, { message: "Credenciales incorrectas" });
                     }
-                     const userObject = user.toObject();
-                    delete userObject.password;
 
-                    return done(null, userObject); 
+                    
+                    delete user.password; 
+                    delete user.createdAt;
+                    delete user.updatedAt;
+
+                    return done(null, user);
+
                 } catch (error) {
-                    return done(error);
+                    console.error("Error en la estrategia de login:", error);
+                    return done(error, false, { message: "Error al intentar iniciar sesión." });
                 }
             }
         )
     );
-
     passport.use("register",
         new local.Strategy(
             {
