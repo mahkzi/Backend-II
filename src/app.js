@@ -2,7 +2,7 @@ import express from 'express';
 import handlebars from 'express-handlebars';
 import {Server} from 'socket.io';
 import { connDB } from './config/db.js';
-
+import cookieParser from 'cookie-parser';
 
 
 import productRouter from './routes/productRouter.js';
@@ -28,6 +28,8 @@ app.set('view engine', 'handlebars');
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
+
+app.use(cookieParser());
 
 iniciarPassport(); 
 app.use(passport.initialize()); 

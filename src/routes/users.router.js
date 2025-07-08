@@ -16,7 +16,7 @@ router.post("/register",
 
        return res.status(200).json({
          status: 'success',
-        message: 'Inicio de sesión exitoso!',
+        message: 'Registro exitoso!',
        });
     }
 );
@@ -26,6 +26,8 @@ router.post("/login",
     (req, res) => {
        
         const loggedInUser = req.user;
+        
+        const token = jwt.sign(loggedInUser, config.JWT_SECRET, { expiresIn: "1h" });
 
  
         res.cookie("cookieToken", token, { httpOnly: true });
@@ -33,7 +35,6 @@ router.post("/login",
         return res.status(200).json({
             status: 'success',
             message: '¡Inicio de sesión exitoso!',
-            usuarioLogueado: loggedInUser
         });
     }
 );
@@ -44,15 +45,17 @@ router.get("/error", (req, res) => {
     return res.status(401).json({message: errorMessage });
 });
 
-router.get("/current", passport.authenticate("current", {sessions:false, failureRedirect:"/api/sessions/error"})),
-(req, res) => {
-    res.setHeader('Content-Type','application/json');
-    return res.status(200).json({
-         status: 'success',
-        message: 'Usuario autenticado correctamente',
-        user: req.user
-    });
-}
+router.get("/current", 
+    passport.authenticate("current", { session: false, failureRedirect: "/api/sessions/error" }), 
+    (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(200).json({
+            status: 'success',
+            message: 'Usuario autenticado correctamente',
+            user: req.user
+        });
+    }
+);
 router.post("/logout", (req, res) => {
     res.clearCookie("cookieToken");
     res.setHeader('Content-Type','application/json');

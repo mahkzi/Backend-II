@@ -26,7 +26,7 @@ export const iniciarPassport = () =>{
                 if(!user){
                     return done(null, false,{message:"usuario no encontrado o token inválido"})
                 }
-              const userObject = user.toObject();
+                  const userObject = { ...user };
                 delete userObject.password;
                 return done(null, userObject);
             } catch (error) {
