@@ -28,11 +28,18 @@ export class UsersManager{
     }
 
    static async createUser(userData) {
-        try {
+       try {
             const newCart = await cartManager.createCart();
             userData.cart = newCart._id;
-            
-            return await usersModel.create(userData);
+
+            console.log("DEBUG: userData justo antes de usersModel.create (o new Model):", userData);
+            console.log("--- ¡VERIFICACIÓN: ESTE ES EL NUEVO CÓDIGO EJECUTÁNDOSE! ---");
+        
+            const user = new usersModel(userData); 
+            const userSaved = await user.save(); 
+
+            return userSaved; 
+
         } catch (error) {
             console.error("Error al crear usuario en DB:", error);
             throw error;

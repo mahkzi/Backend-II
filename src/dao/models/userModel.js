@@ -30,13 +30,17 @@ export const usersModel = mongoose.model(
 );
 
 usersModel.schema.pre('save', async function (next) {
-    if (this.isModified('password')) {
+   if (this.isModified('password') || this.isNew) {
         console.log("-----------------------------------------");
         console.log("Hook pre('save') ejecutándose para:", this.email);
         console.log("Contraseña ANTES del hashing:", this.password); 
         this.password = await bcrypt.hash(this.password, 10);
         console.log("Contraseña DESPUÉS del hashing:", this.password); 
         console.log("-----------------------------------------");
+    }else {
+       
+        console.log("DEBUG: La contraseña no se hasheó. isModified('password'):", this.isModified('password'), "isNew:", this.isNew);
     }
     next();
 });
+console.log("DEBUG: Mongoose pre('save') hook para usersModel definido.");

@@ -17,7 +17,6 @@ router.post("/register",
        return res.status(200).json({
          status: 'success',
         message: 'Inicio de sesión exitoso!',
-        usuarioLogueado: registeredUser
        });
     }
 );
@@ -54,5 +53,10 @@ router.get("/current", passport.authenticate("current", {sessions:false, failure
         user: req.user
     });
 }
+router.post("/logout", (req, res) => {
+    res.clearCookie("cookieToken");
+    res.setHeader('Content-Type','application/json');
+    return res.status(200).json({ message: "Sesión cerrada exitosamente" });
+});
 
 export default router; 
