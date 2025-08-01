@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-export const usersModel = mongoose.model(
+export const userModel = mongoose.model(
     "users",
     new mongoose.Schema(
         {
@@ -16,12 +16,15 @@ export const usersModel = mongoose.model(
             password: { type: String, required: true }, 
             cart: {
                 type: mongoose.Schema.Types.ObjectId, 
-                ref: "carts" 
+                ref: "carts",
+                required:true
             },
             role: {
                 type: String,
                 default: "user",
-            }
+            },
+            resetPasswordToken: String,
+            resetPasswordExpires: Date,
         },
         {
             timestamps: true

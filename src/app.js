@@ -1,52 +1,66 @@
 import express from 'express';
+import { Server } from 'socket.io';
 import handlebars from 'express-handlebars';
-import {Server} from 'socket.io';
-import { connDB } from './config/db.js';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
 
+import { config } from './config/config.js'; 
+import { connDB } from './config/db.js';     
+import iniciarPassport from './config/passport.config.js'; 
 
 import productRouter from './routes/productRouter.js';
 import cartRouter from './routes/cartRouter.js';
-import viewsRouter from './routes/viewsRouter.js';
 import usersRouter from './routes/users.router.js';
-import __dirname from './utils/constantsUtil.js';
-import websocket from './websocket.js';
-import { config } from './config/config.js';
-
-import passport from 'passport';
-import { iniciarPassport } from './config/passport.config.js';
-
+import viewsRouter from './routes/viewsRouter.js'; 
+import websocket from './websocket.js'; 
 const app = express();
 
 
-//Handlebars Config
+connDB(config.MONGO_URL, config.DB_NAME);
+
+
 app.engine('handlebars', handlebars.engine());
-app.set('views', __dirname + '/../views');
+app.set('views', './src/views'); 
 app.set('view engine', 'handlebars');
 
-//Middlewares
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(express.static('public'));
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('./public'));
 app.use(cookieParser());
 
 iniciarPassport(); 
-app.use(passport.initialize()); 
+app.use(passport.initialize());
 
-//Routers
+
+
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
+app.use('/api/sessions', usersRouter);
+
+
 app.use('/', viewsRouter);
-app.use("/api/sessions", usersRouter);
+
+
+app.use((err, req, res, next) => {
+    console.error(err.stack); 
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Error interno del servidor.';
+
+    
+    if (req.accepts('html')) {
+        res.status(statusCode).render('errorPage', { title: 'Error', message: message, style: 'error.css' });
+    } else {
+        res.status(statusCode).json({ status: 'error', message: message });
+    }
+});
+
 
 const PORT = config.PORT;
 const httpServer = app.listen(PORT, () => {
-    console.log(`Start server in PORT ${PORT}`);
+    console.log(`Servidor escuchando en puerto ${PORT}`);
 });
 
-connDB(config.MONGO_URL, config.DB_Name);
 
 const io = new Server(httpServer);
-
-websocket(io);
+websocket(io); 
