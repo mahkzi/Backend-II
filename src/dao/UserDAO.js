@@ -1,5 +1,4 @@
 import { userModel } from './models/userModel.js';
-import { createHash } from '../utils/passwordUtil.js'; 
 
 export class UserDAO { 
     static async getUsers() {
@@ -15,16 +14,16 @@ export class UserDAO {
     }
 
     static async createUser(userData) {
-        if (userData.password) {
-            userData.password = createHash(userData.password);
-        }
+        console.log('UserDAO: Creando usuario en la base de datos.');
         const newUser = await userModel.create(userData);
         return newUser.toObject();
     }
 
-    static async updateUser(uid, newData) {
+
+     static async updateUser(uid, newData) {
       
         if (newData.password) {
+           
             newData.password = createHash(newData.password);
         }
         const updatedUser = await userModel.findByIdAndUpdate(uid, newData, { new: true }).lean();

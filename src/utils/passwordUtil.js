@@ -6,10 +6,12 @@ export const createHash = (password) => {
 
 export const isValidPassword = (user, password) => {
    
-    return bcrypt.compareSync(password, user.password);
-};
+    console.log('Validando contraseña:');
+    console.log('Contraseña proporcionada:', password);
+    console.log('Contraseña en la DB:', user.password);
 
+    const match = bcrypt.compareSync(password, user.password);
+    console.log('Coincidencia:', match);
 
-export const compareHash = (user, newPlainPassword) => {
-    return bcrypt.compareSync(newPlainPassword, user.password);
+    return match;
 };

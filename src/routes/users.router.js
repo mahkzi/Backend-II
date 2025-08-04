@@ -2,15 +2,16 @@ import { Router } from 'express';
 import passport from 'passport';
 import UserRepository from '../repositories/UserRepository.js'; 
 import { sendPasswordResetEmail } from '../utils/emailUtil.js';
-import { compareHash, createHash } from '../utils/passwordUtil.js'
+import { createHash} from '../utils/passwordUtil.js';
 import { config } from '../config/config.js'; 
 import crypto from 'crypto'; 
-import UserDTO from '../DTO/UserDTO.js'; 
+import UserDTO from '../DTO/UserDTO.js';
+import { generateAuthToken } from '../utils/jwt.js'; 
 
 const router = Router();
 const userRepository = UserRepository;
 
-router.post('/register', passport.authenticate('register', { failureRedirect: '/api/sessions/failregister' }), async (req, res) => {
+router.post('/register', passport.authenticate('register', { failureRedirect: '/api/sessions/failregister', session:false }), async (req, res) => {
     res.status(201).json({ status: 'success', message: 'Usuario registrado correctamente', payload: req.user });
 });
 
@@ -18,28 +19,25 @@ router.get('/failregister', async (req, res) => {
     res.status(400).json({ status: 'error', message: 'Error al registrar el usuario.' });
 });
 
-router.post('/login', passport.authenticate('login', { failureRedirect: '/api/sessions/faillogin' }), async (req, res) => {
+router.post('/login', passport.authenticate('login', { failureRedirect: '/api/sessions/faillogin', session: false }), async (req, res) => {
     try {
-    
         if (!req.user) {
             return res.status(400).json({ status: 'error', message: 'Credenciales inválidas.' });
         }
 
+        const userPayload = new UserDTO(req.user);
+        console.log('Router de Login: Payload a ser usado en el token:', userPayload); 
+        const token = generateAuthToken(userPayload); 
 
-        const token = req.user.generateAuthToken();
-       
-      
-        res.cookie('coderCookieToken', token, {
-            maxAge: 60 * 60 * 1000, 
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production' 
-        });
+        res.cookie('coderCookieToken', token, { httpOnly: true });
 
-        res.status(200).json({ status: 'success', message: 'Sesión iniciada correctamente', user: new UserDTO(req.user) }); 
+        res.status(200).json({ status: 'success', message: 'Login exitoso.' });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: 'Error en el login: ' + error.message });
+        console.error('Error en el login post-autenticación:', error);
+        res.status(500).json({ status: 'error', message: 'Error interno del servidor.' });
     }
 });
+
 
 router.get('/faillogin', async (req, res) => {
     res.status(400).json({ status: 'error', message: 'Error al iniciar sesión.' });
@@ -51,13 +49,17 @@ router.get('/logout', async (req, res) => {
 });
 
 
-router.get('/current',
-    passport.authenticate('current', { session: false }), 
-    (req, res) => {
-       
-        res.status(200).json({ status: 'success', payload: req.user });
+router.get('/current', passport.authenticate('current', { session: false }), async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ status: 'error', message: 'No autenticado.' });
+        }
+        res.json({ status: 'success', payload: req.user });
+    } catch (error) {
+        console.error('Error en la ruta /current:', error);
+        res.status(500).json({ status: 'error', message: 'Error interno del servidor.' });
     }
-);
+});
 
 
 router.post('/forgot-password', async (req, res) => {
