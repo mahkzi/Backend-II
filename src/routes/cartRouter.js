@@ -82,7 +82,7 @@ router.put('/:cid/products/:pid',
             if (typeof quantity !== 'number' || quantity < 0) {
                 return res.status(400).json({ status: 'error', message: 'La cantidad debe ser un número positivo.' });
             }
-            const updatedCart = await CartService.updateProductQuantityInCart(cid, pid, quantity);
+            const updatedCart = await CartService.updateProductQuantity(cid, pid, quantity);
             res.status(200).json({ status: 'success', payload: updatedCart });
         } catch (error) {
             res.status(400).json({ status: 'error', message: error.message });
@@ -150,79 +150,23 @@ router.delete('/:cid',
 );
 
 
-
-router.post('/:cid/purchase',
+router.post(
+    '/:cid/purchase',
     passport.authenticate('current', { session: false }),
-    authorize('user'), 
+    authorize('user'),
     async (req, res) => {
-        const { cid } = req.params;
-        const purchaserEmail = req.user.email; 
-
         try {
-            
-            if (req.user.cart !== cid) {
-                return res.status(403).json({ status: 'error', message: 'Prohibido: No puedes comprar este carrito.' });
-            }
-
-            const cart = await CartService.getProductsFromCartById(cid);
-
-            if (!cart || cart.products.length === 0) {
-                return res.status(400).json({ status: 'error', message: 'El carrito está vacío o no existe.' });
-            }
-
-            const productsToPurchase = [];
-            const productsFailed = [];
-            let totalAmount = 0;
-
-            for (const item of cart.products) {
-                const productDB = await ProductService.getProductById(item.product._id);
-
-                if (productDB && productDB.stock >= item.quantity) {
-                    productsToPurchase.push({
-                        product: item.product._id,
-                        quantity: item.quantity,
-                        price: productDB.price
-                    });
-                    totalAmount += productDB.price * item.quantity;
-                   
-                    await ProductService.updateProductStock(item.product._id, productDB.stock - item.quantity);
-                } else {
-                    productsFailed.push({
-                        product: item.product._id,
-                        quantity: item.quantity,
-                        availableStock: productDB ? productDB.stock : 0
-                    });
-                }
-            }
-
-            let ticket = null;
-            if (productsToPurchase.length > 0) {
-                ticket = await TicketService.createTicket({
-                    code: 'TICKET-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                    purchase_datetime: new Date(),
-                    amount: totalAmount,
-                    purchaser: purchaserEmail,
-                    products: productsToPurchase 
-                });
-
-                
-                const updatedCartProducts = cart.products.filter(item =>
-                    !productsToPurchase.some(p => p.product.toString() === item.product._id.toString())
-                );
-                await CartService.updateAllProductsInCart(cid, updatedCartProducts);
-            }
+            const cartId = req.params.cid;
+            const purchaserEmail = req.user.email; 
+            const result = await CartRepository.purchaseCart(cartId, purchaserEmail);
 
             res.status(200).json({
                 status: 'success',
-                message: 'Proceso de compra completado.',
-                ticket: ticket,
-                productsFailed: productsFailed,
-                cartUpdated: await CartService.getProductsFromCartById(cid) 
+                message: 'Compra finalizada con éxito.',
+                payload: result
             });
-
         } catch (error) {
-            console.error("Error en la ruta de compra:", error);
-            res.status(500).json({ status: 'error', message: `Error al procesar la compra: ${error.message}` });
+            res.status(500).json({ status: 'error', message: error.message });
         }
     }
 );

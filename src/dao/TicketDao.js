@@ -1,11 +1,6 @@
-import { ticketModel } from './models/ticketModel.js'; 
+import ticketModel from './models/ticketModel.js';
 
 class TicketDAO {
-    /**
-     * 
-     * @param {object} ticketData 
-     * @returns {Promise<object>} 
-     */
     async createTicket(ticketData) {
         try {
             const newTicket = await ticketModel.create(ticketData);
@@ -15,12 +10,6 @@ class TicketDAO {
             throw new Error("No se pudo crear el ticket. " + error.message);
         }
     }
-
-    /**
-     * 
-     * @param {string} tid 
-     * @returns {Promise<object|null>} 
-     */
     async getTicketById(tid) {
         try {
             const ticket = await ticketModel.findById(tid).populate('products.product').lean();

@@ -1,4 +1,4 @@
-import TicketDAO from '../dao/TicketDAO.js'; 
+import TicketDAO from '../dao/TicketDAO.js';
 
 class TicketRepository {
     static #ticketDAO = new TicketDAO();
