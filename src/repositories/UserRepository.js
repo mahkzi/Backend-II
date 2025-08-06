@@ -43,16 +43,6 @@ class UserRepository {
         return await UserDAO.updateUser(id, newData);
     }
 
-    async findUserByResetToken(token) {
-        const user = await UserDAO.findUserByToken(token); 
-        return user; 
-    }
-
-    
-    async updatePassword(email, newPlainPassword) {
-        const newHashedPassword = createHash(newPlainPassword);
-        return await UserDAO.updatePassword(email, newHashedPassword);
-    }
 }
 
 export default new UserRepository();

@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import passport from 'passport';
 import { authorize } from '../middleware/authMiddleware.js';
-import { getCarts, getCartById, addProductToCart, updateCart, updateProductQuantity, removeProductFromCart, emptyCart, purchaseCart } from '../controllers/cart.controller.js';
+import { getCarts, createCart, getCartById, addProductToCart, updateCart, updateProductQuantity, removeProductFromCart, emptyCart, purchaseCart } from '../controllers/cart.controller.js';
 
 const router = Router();
 
 router.get('/', passport.authenticate('current', { session: false }), authorize('admin'), getCarts);
+
+router.post('/', passport.authenticate('current', { session: false }), createCart);
 
 router.get('/:cid', passport.authenticate('current', { session: false }), authorize(['user', 'admin']), getCartById);
 

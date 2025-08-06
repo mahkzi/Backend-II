@@ -9,6 +9,15 @@ export const getCarts = async (req, res) => {
     }
 };
 
+export const createCart = async (req, res) => {
+    try {
+        const newCart = await CartRepository.createCart();
+        res.status(201).json({ status: 'success', payload: newCart });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+
 export const getCartById = async (req, res) => {
     try {
         const { cid } = req.params;
