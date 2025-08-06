@@ -9,4 +9,5 @@ export const config = {
     JWT_SECRET: process.env.JWT_SECRET || 'secretoSuperSeguro',
     EMAIL_USER: process.env.EMAIL_USER,
     EMAIL_PASS: process.env.EMAIL_PASS,
+    jwt_cookie_name: 'coderCookieToken',
 };
