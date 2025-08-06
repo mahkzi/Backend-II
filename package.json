@@ -1,5 +1,5 @@
 {
-  "name": "curso-programacion-backend-proyecto-final",
+  "name": "curso-programacion-backend-2-proyecto-final",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -10,7 +10,7 @@
     "dev": "node --watch src/app.js"
   },
   "keywords": [],
-  "author": "Joaquin Cejas",
+  "author": "Máximo Castro Braga",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
